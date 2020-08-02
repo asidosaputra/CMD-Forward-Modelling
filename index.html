@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.1.0/math.min.js" integrity="sha512-rCvDXOM8HOkDDjC0l9vQPhUg2n0rKlcsCtDjWG0ajYmVfjgtO6egt/RdSbKSzFCIUaE/OQRwmiU/4PmOeK3J+Q==" crossorigin="anonymous"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
+
+    <title>1D CMD  Forward Modelling</title>
+    <style>
+        body{
+            display: flex;
+            justify-content: center;
+        }
+        .hidden-container {
+            background-color: #24a19c;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            margin-top: 5px;
+            z-index: -999;
+            height: 100px;
+            width: 100%;
+        }
+
+        .container{
+            display: flex;
+            flex-direction: row;
+            background-color: #E2E8F0;
+            width: 1000px;
+            padding: 15px;
+            height: 550px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            margin-top: 50px;
+
+        }
+
+        .left-container{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 350px;
+            height: 100%;
+        }
+
+        .right-container{
+            display: flex;
+            flex-direction: column;
+            width: 600px;
+            height: 100%;
+            margin-left: 40px;
+        }
+
+        .obs-container{
+            display: flex;
+            flex-direction: column;
+            width: 350px;
+            height: 140px;
+            margin-bottom: 30px;
+
+        }
+        .input{
+            height: 20px;
+            width: 70px;
+            margin-left: 0px;
+            
+        }
+
+        .title{
+            font-size: medium;
+            text-align: center;
+            margin-top: 0px;
+            height: 25px;
+            color: #ffffff;
+            font-family:'Segoe UI', Tahoma, Verdana, sans-serif;
+            background-color: #6ebfb5;
+        }
+
+        .model-input{
+            display: flex;
+            flex-direction: column ;
+            width: 350px;
+            height: 300px;
+
+        }
+
+        .input-model-left{
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+            height: 180px;
+            overflow-y:auto;
+            
+
+        }
+        .input-model-right{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 180px;
+            
+
+        }
+
+        .input-model-center{
+            display: flex;
+            flex-direction: row;
+            width: 350px;
+            height: 180px;
+            
+
+        }
+
+        .button{
+            display:inline-block;
+            padding:0.1em 1em;
+            border:0.3em solid  #24a19c;
+            background-color: #E2E8F0;
+            margin:0 0.3em 0.3em 0;
+            box-sizing:border-box;
+            text-decoration:none;
+            text-transform:uppercase;
+            font-family:'Roboto',sans-serif;
+            font-weight:700;
+            color: #6ebfb5;
+            text-align:center;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+
+        .button:hover{
+            color: RoyalBlue;
+            border-color: RoyalBlue;
+        }
+
+        .btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #E2E8F0; /* Blue background */
+            border: 0.15em solid  #24a19c; /* Remove borders */
+            color: #24a19c; /* White text */
+            box-sizing:border-box;
+            height: 30px;
+            width: 30px;
+            padding:0em 0.23em;
+            font-size:25px; /* Set a font size */
+            cursor: pointer; /* Mouse pointer on hover */
+            }
+
+        .btn:hover {
+            background-color: #ffffff;
+            color: RoyalBlue;
+            border-color: RoyalBlue;
+            }
+
+        *tr{
+            justify-content: center;
+            align-items: center;
+        }
+        *td{
+            justify-content: center;
+            align-items: center;
+        }
+
+       </style>
+</head>
+<body>
+    <div class="hidden-container">
+        <h1 style="color: #ffffff; margin: 0; font-size: 1.5em; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">1D CMD Forward Modelling</h1>
+    </div>
+    <div class="container">
+        <div class="left-container">
+            <div class="obs-container">
+                <h1 class="title">Observation Data</h1>
+                <table  style="text-align:center">
+                    <thead>
+                      <tr>
+                        <th scope="col"></th>
+                        <th scope="col">10</th>
+                        <th scope="col">20</th>
+                        <th scope="col">40</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr id="inputH">
+                        <th scope="row">H</th>
+                        <td><input type="number" class="input" min="0" max="100000"></td>
+                        <td><input type="number" class="input" min="0" max="100000"></td>
+                        <td><input type="number" class="input" min="0" max="100000"></td>
+                      </tr>
+                      <tr id="inputV">
+                        <th scope="row">V</th>
+                        <td><input type="number" class="input" min="0" max="100000"></td>
+                        <td><input type="number" class="input" min="0" max="100000"></td>
+                        <td><input type="number" class="input" min="0" max="100000"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+            </div>
+
+            <div class="obs-container">
+                <h1 class="title">Calculation Data</h1>
+                <table style="text-align:center">
+                    <thead>
+                      <tr>
+                        <th scope="col"></th>
+                        <th scope="col">10</th>
+                        <th scope="col">20</th>
+                        <th scope="col">40</th>
+                      </tr>
+                    </thead>
+                    <tbody id="calcData">
+                      <tr >
+                        <th scope="row">H</th>
+                        <td>----</td>
+                        <td>----</td>
+                        <td>----</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">V</th>
+                        <td>----</td>
+                        <td>----</td>
+                        <td>----</td>
+                      </tr>
+                    </tbody>
+                  </table>
+            </div>
+
+            <div class="model-input">
+                <h1 class="title">Model</h1>
+
+                <div class="input-model-center">
+                    <div class="input-model-left">
+                        <table id="inputObs" style="text-align:center">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Layer</th>
+                                    <th scope="col">Thickness</th>
+                                    <th scope="col">Resistivities</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bInputModel">
+                                <tr>
+                                    <th scope="row">1</th>
+                                    <td><input type="number" class="input" min="0" max="100000"></td>
+                                    <td><input type="number" class="input" min="0" max="100000"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+    
+                    <div class="input-model-right">
+                        <button id="btnPlus" class="btn">+</button>
+                        <button id="btnMinus" style="margin-top: 10px;" class="btn">-</button>
+                    </div>
+
+                </div>
+
+            </div>
+            <button id="btnExecute" class="button">Execute</button>    
+        </div>
+        <div  id="my_dataviz" class="right-container">
+            <h1 class="title">Interactive Model</h1>
+        </div>
+    </div>
+    
+</body>
+<script src="./app.js"></script>
+</html>
